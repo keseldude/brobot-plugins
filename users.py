@@ -18,15 +18,12 @@
 
 from core import bot
 
-class CommandsPlugin(bot.CommandPlugin):
-    name = 'commands'
+class UsersPlugin(bot.CommandPlugin):
+    name = 'users'
     def process(self, connection, source, target, args):
-        names = []
-        for msg_type, plugins in self.ircbot.command_plugins.iteritems():
-            for plugin in plugins.itervalues():
-                if not plugin.admin:
-                    names.append(plugin.name)
-        
-        self.ircbot.privmsg(connection, target,
-                            'Commands: ' + ' '.join(sorted(names)))
+        channel = self.ircbot.find_channel(connection.server, target)
+        if channel is not None:
+            self.ircbot.privmsg(connection, target,
+                '%d Users in the channel.' % len(channel.users))
     
+

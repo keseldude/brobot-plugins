@@ -18,15 +18,8 @@
 
 from core import bot
 
-class CommandsPlugin(bot.CommandPlugin):
-    name = 'commands'
+class VersionPlugin(bot.CommandPlugin):
+    name = 'version'
     def process(self, connection, source, target, args):
-        names = []
-        for msg_type, plugins in self.ircbot.command_plugins.iteritems():
-            for plugin in plugins.itervalues():
-                if not plugin.admin:
-                    names.append(plugin.name)
-        
-        self.ircbot.privmsg(connection, target,
-                            'Commands: ' + ' '.join(sorted(names)))
+        self.ircbot.privmsg(connection, target, self.ircbot.get_version())
     
