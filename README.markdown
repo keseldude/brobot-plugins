@@ -1,4 +1,4 @@
-# [(BROBOT)](http://github.com/keseldude/brobot) PLUGINS
+# [(BROBOT)](http://github.com/keseldude/brobot) Plugins
 
 ## Note:
 
