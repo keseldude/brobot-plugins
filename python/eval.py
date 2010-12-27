@@ -17,18 +17,34 @@
 #===============================================================================
 
 from core import bot
-from random import choice
+from evaluator import evaluator
 
-class ChoicePlugin(bot.CommandPlugin):
-    name = 'choice'
+class PythonEvalPlugin(bot.CommandPlugin):
+    name = 'python-eval'
     def process(self, connection, source, target, args):
-        if len(args) > 0:
-            expr = u' '.join(args) # undo arg split
-            choice_args = expr.split(u' or ')
+        expr = u' '.join(args)
+        
+        try:
+            result = unicode(evaluator(expr))
+            msg = result[:100]
+            if result != msg:
+                msg += '...'
             
             return {'action': self.Action.PRIVMSG,
                     'target': target,
-                    'message': (choice(choice_args).strip(),)
+                    'message': (msg,)
                     }
-    
+        except SyntaxError:
+            return {'action': self.Action.PRIVMSG,
+                    'target': target,
+                    'message': (u'Syntax Error',)
+                    }
+        except Exception, e:
+            ename = e.__class__.__name__
+            msg = '%s: %s' % (ename, e)
+            return {'action': self.Action.PRIVMSG,
+                    'target': target,
+                    'message': (msg,)
+                    }
+            
 

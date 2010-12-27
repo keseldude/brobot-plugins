@@ -65,13 +65,19 @@ class LastShowPlugin(bot.CommandPlugin):
             info = get_tvrage_info(parameter)
             
             if 'error' in info:
-                self.ircbot.privmsg(connection, target, info['error'])
+                return {'action': self.Action.PRIVMSG,
+                        'target': target,
+                        'message': (info['error'],)
+                        }
             else:
-                self.ircbot.privmsg(connection, target,
-                                    u'Last episode of %s: %s %s [%s]. %s' % \
+                return {'action': self.Action.PRIVMSG,
+                        'target': target,
+                        'message': (u'Last episode of %s: %s %s [%s]. %s' % \
                                     (info['name'], info['l_num'],
                                      info['l_title'], info['l_date'],
-                                     info['url']))
+                                     info['url']),)
+                        }
+                                    
 
 class NextShowPlugin(bot.CommandPlugin):
     name = 'next'
@@ -81,16 +87,28 @@ class NextShowPlugin(bot.CommandPlugin):
             info = get_tvrage_info(parameter)
             
             if 'error' in info:
-                self.ircbot.privmsg(connection, target, info['error'])
-            elif 'n_num' not in info and 'status' in info and \
-                'Ended' in info['status']:
-                self.ircbot.privmsg(connection, target,
-                                    u'%s is over. It ended %s.' % \
-                                    (info['name'], info['ended']))
+                return {'action': self.Action.PRIVMSG,
+                        'target': target,
+                        'message': (info['error'],)
+                        }
+            elif 'n_num' not in info:
+                if 'status' in info and 'Ended' in info['status']:
+                    return {'action': self.Action.PRIVMSG,
+                            'target': target,
+                            'message': (u'%s is over. It ended %s.' % \
+                                        (info['name'], info['ended']),)
+                            }
+                else:
+                    return {'action': self.Action.PRIVMSG,
+                            'target': target,
+                            'message': (u'Next episode info unavailable.',)
+                            }
             else:
-                self.ircbot.privmsg(connection, target,
-                                    u'Next episode of %s: %s %s [%s]. %s' % \
+                return {'action': self.Action.PRIVMSG,
+                        'target': target,
+                        'message': (u'Next episode of %s: %s %s [%s]. %s' % \
                                     (info['name'], info['n_num'],
                                      info['n_title'], info['n_date'],
-                                     info['url']))
+                                     info['url']),)
+                        }
     

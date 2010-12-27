@@ -70,28 +70,39 @@ class TellPlugin(bot.CommandPlugin):
             finally:
                 shelf.close()
             
-            self.ircbot.privmsg(connection, target, u'Consider it done.')
+            return {'action': self.Action.PRIVMSG,
+                    'target': target,
+                    'message': (u'Consider it done.',)
+                    }
     
 
 class ReadPlugin(bot.CommandPlugin):
     name = 'read'
     def process(self, connection, source, target, args):
-        messages = None
+        msgs = []
         key = prefix + source.nick
         shelf = shelve.open(self.shelf_path)
         try:
             if shelf.has_key(key):
                 messages = shelf[key]
                 for message in messages.messages:
-                    self.ircbot.privmsg(connection, source.nick,
-                        u'%s said: %s [%s]' % (message.nick, message.message,
-                                               message.time))
+                    msgs.append(u'%s said: %s [%s]' % (message.nick,
+                                                       message.message,
+                                                       message.time))
                 del shelf[key]
         finally:
             shelf.close()
         
-        if messages is None:
-            self.ircbot.privmsg(connection, target, u'You have no messages.')
+        if msgs:
+            return {'action': self.Action.PRIVMSG,
+                    'target': target,
+                    'message': msgs
+                    }
+        else:
+            return {'action': self.Action.PRIVMSG,
+                    'target': target,
+                    'message': (u'You have no messages.',)
+                    }
     
 
 class NotifyMessagesPlugin(bot.EventPlugin):

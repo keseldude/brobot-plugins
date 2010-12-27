@@ -55,8 +55,10 @@ class SeenPlugin(bot.CommandPlugin):
         if len(args) == 1:
             nick = args[0].lower().encode('utf-8')
             if nick == source.nick:
-                self.ircbot.privmsg(connection, target, u'I see you!')
-                return
+                return {'action': self.Action.PRIVMSG,
+                        'target': target,
+                        'message': (u'I see you!',)
+                        }
             
             key = '%s_%s_%s' % (prefix, connection.server.host, nick)
             
@@ -73,7 +75,10 @@ class SeenPlugin(bot.CommandPlugin):
             finally:
                 shelf.close()
             
-            self.ircbot.privmsg(connection, target, message)
+            return {'action': self.Action.PRIVMSG,
+                    'target': target,
+                    'message': (message,)
+                    }
     
 
 class UserTrackPlugin(bot.EventPlugin):

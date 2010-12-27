@@ -17,37 +17,13 @@
 #===============================================================================
 
 from core import bot
-from core.irc.structures import User
-from datetime import datetime
 
-class UptimePlugin(bot.CommandPlugin):
-    name = 'version'
-    def load(self):
-        self.start_time = datetime.utcnow()
-    
-    def format_timedelta(self, delta):
-        message = ''
-        if delta.days > 0:
-            message += '%s days ' % delta.days
-        
-        hours = delta.seconds // 3600
-        seconds = delta.seconds - (hours * 3600)
-        minutes = seconds // 60
-        seconds = seconds - (minutes * 60)
-        
-        if hours > 0:
-            message += '%s hours ' % hours
-        if minutes > 0:
-            message += '%s min ' % minutes
-        if seconds > 0:
-            message += '%s sec ' % seconds
-        
-        return message.strip()
-    
+class ReversePlugin(bot.CommandPlugin):
+    name = 'reverse'
     def process(self, connection, source, target, args):
-        delta = datetime.utcnow() - self.start_time
+        expr = u' '.join(args)
         return {'action': self.Action.PRIVMSG,
                 'target': target,
-                'message': (self.format_timedelta(delta),)
+                'message': expr[::-1].split(u'\n')
                 }
     

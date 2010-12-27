@@ -27,6 +27,8 @@ class CommandsPlugin(bot.CommandPlugin):
                 if not plugin.admin:
                     names.append(plugin.name)
         
-        self.ircbot.privmsg(connection, target,
-                            'Commands: ' + ' '.join(sorted(names)))
+        return {'action': self.Action.PRIVMSG,
+                'target': target,
+                'message': ('Commands: ' + ' '.join(sorted(names)),)
+                }
     

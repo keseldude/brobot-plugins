@@ -24,6 +24,9 @@ import time
 import re
 import itertools
 import shelve
+import logging
+
+log = logging.getLogger(__name__)
 
 class Reminder(object):
     def __init__(self, nick, task, future_time, server, target):
@@ -56,8 +59,10 @@ class ReminderPlugin(bot.CommandPlugin):
     
     def process(self, connection, source, target, args):
         if len(args) < 2:
-            self.ircbot.privmsg(connection, target, self.syntax)
-            return
+            return {'action': self.Action.PRIVMSG,
+                    'target': target,
+                    'message': (self.syntax,)
+                    }
         
         nick = args[0]
         
@@ -69,19 +74,24 @@ class ReminderPlugin(bot.CommandPlugin):
             else:
                 channel = self.ircbot.find_channel(connection.server, target)
                 if channel is None:
-                    self.ircbot.privmsg(connection, target, self.syntax)
-                    return
+                    return {'action': self.Action.PRIVMSG,
+                            'target': target,
+                            'message': (self.syntax,)
+                            }
                 elif not channel.in_channel(nick):
-                    self.ircbot.privmsg(connection, target,
-                                        u'User not in channel.')
-                    return
+                    return {'action': self.Action.PRIVMSG,
+                            'target': target,
+                            'message': (u'User not in channel.',)
+                            }
             args = args[1:]
         
         amount_of_time = self.TIME_SPLIT_RE.split(args[0])
         delta = self.get_timedelta(amount_of_time)
         if delta is None:
-            self.ircbot.privmsg(connection, target, self.syntax)
-            return
+            return {'action': self.Action.PRIVMSG,
+                    'target': target,
+                    'message': (self.syntax,)
+                    }
         
         future_time = datetime.utcnow() + delta
         
@@ -95,9 +105,11 @@ class ReminderPlugin(bot.CommandPlugin):
         timer.start()
         
         message_object = u'you' if nick == source.nick else nick
-        self.ircbot.privmsg(connection, target,
-                            u'Okay, I will remind %s to %s on %s UTC.' % \
-                            (message_object, task, future_time.ctime()))
+        return {'action': self.Action.PRIVMSG,
+                'target': target,
+                'message': (u'Okay, I will remind %s to %s on %s UTC.' % \
+                            (message_object, task, future_time.ctime()),)
+                }
     
     def get_timedelta(self, amount_of_time):
         deltadict = {}
@@ -156,7 +168,7 @@ class ReminderPlugin(bot.CommandPlugin):
                 reminders.remove(reminder)
                 shelf[key] = reminders
         except ValueError:
-            print 'Unable to remove reminder... something is wrong'
+            log.error(u'Unable to remove reminder... something is wrong')
         finally:
             shelf.close()
     
@@ -167,10 +179,11 @@ class ReminderPlugin(bot.CommandPlugin):
             message = message + u" (Sorry I'm so late!)"
         
         channel = Channel(connection.server, reminder.target)
+        
+        self.remove_reminder(reminder)
+        
         if channel not in self.ircbot.channels:
             self.ircbot.privmsg(connection, reminder.nick, message)
         else:
             self.ircbot.privmsg(connection, reminder.target, message)
-        
-        self.remove_reminder(reminder)
     
