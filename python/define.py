@@ -93,7 +93,7 @@ class UndefinePlugin(bot.CommandPlugin):
         else:
             return {'action': self.Action.PRIVMSG,
                     'target': target,
-                    'message': (u'No such plugin has been defined.' % f_name,)
+                    'message': (u'No such plugin has been defined.',)
                     }
     
 
