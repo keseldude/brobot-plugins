@@ -32,7 +32,7 @@ urllib._urlopener = FirefoxURLopener()
 
 class URITitlePlugin(bot.EventPlugin):
     name = 'uri-title'
-    URI_RE = re.compile(r'https?://[A-Za-z0-9\-\.\'_/&%#=?+]+')
+    URI_RE = re.compile(r'https?://[A-Za-z0-9\-\.\'_/&%#=?,+]+')
     def get_title(self, uri):
         try:
             connected_uri = urllib.urlopen(uri)
