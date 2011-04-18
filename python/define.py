@@ -52,7 +52,7 @@ class DefinePlugin(bot.CommandPlugin):
                     ename = e.__class__.__name__
                     msg = '%s: %s' % (ename, e)
                     return {'action': self.Action.PRIVMSG,
-                            'target': target,
+                            'target': t,
                             'message': (msg,)
                             }
                 else:

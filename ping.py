@@ -16,33 +16,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #===============================================================================
 
-import sys
-import os
-import signal
-from subprocess import Popen
-import ctypes
+from core import bot
 
-def kill(pid, signal):
-    if sys.platform == 'win32':
-        kernel32 = ctypes.windll.kernel32
-        handle = kernel32.OpenProcess(1, 0, pid)
-        kernel32.TerminateProcess(handle, 0)
-    else:
-        try:
-            os.kill(pid, signal)
-        except OSError:
-            # Could not kill process. I guess it died?
-            pass
-
-def main(args):
-    pid = None
-    with open(args[0], 'r') as pidfile:
-        pid = int(pidfile.read())
+class PingPlugin(bot.CommandPlugin):
+    name = 'ping'
+    def process(self, connection, source, target, args):
+        message = u' '.join(args)
+        self.ircbot.ping(connection, message=message)
     
-    if pid is not None:
-        kill(pid, signal.SIGTERM)
-        Popen([args[1], args[2]])
-    
-
-if __name__ == '__main__':
-    main(sys.argv[1:])

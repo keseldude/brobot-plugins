@@ -21,6 +21,7 @@ import re
 import urllib
 import logging
 from BeautifulSoup import BeautifulSoup
+import gc
 
 log = logging.getLogger(__name__)
 
