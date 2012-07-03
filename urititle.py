@@ -33,7 +33,7 @@ urllib._urlopener = FirefoxURLopener()
 
 class URITitlePlugin(bot.EventPlugin):
     name = 'uri-title'
-    URI_RE = re.compile(r'https?://[A-Za-z0-9\-\.\'_/&%#=?,+]+')
+    URI_RE = re.compile(r'https?://[A-Za-z0-9:\-\.\'_/&%#!=?,+]+')
     def get_title(self, uri):
         try:
             connected_uri = urllib.urlopen(uri)
@@ -48,7 +48,8 @@ class URITitlePlugin(bot.EventPlugin):
                 if content_type.startswith('text/html'):
                     soup = BeautifulSoup(connected_uri)
                     
-                    if soup.title is not None:
+                    if soup.title is not None and \
+                        soup.title.string is not None:
                         title = \
                             BeautifulSoup(u' '.join(soup.title.string.split()),
                                           convertEntities=\
@@ -57,6 +58,7 @@ class URITitlePlugin(bot.EventPlugin):
         finally:
             connected_uri.close()
             del connected_uri
+            gc.collect(2)
         
         return None
     
