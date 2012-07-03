@@ -45,7 +45,7 @@ key = 'reminders'
 
 class ReminderPlugin(bot.CommandPlugin):
     name = 'remind'
-    TIME_SPLIT_RE = re.compile(r'([hswdm])')
+    TIME_SPLIT_RE = re.compile(r'([hsdm])')
     TIME_UNITS = {'s': lambda x: {'seconds': x},
                   'm': lambda x: {'minutes': x},
                   'h': lambda x: {'hours': x},
@@ -127,7 +127,12 @@ class ReminderPlugin(bot.CommandPlugin):
             
             deltadict.update(self.TIME_UNITS[unit](amount))
         
-        return timedelta(**deltadict)
+        if deltadict:
+            try:
+                return timedelta(**deltadict)
+            except OverflowError:
+                return None
+        return None
     
     def load_reminders(self):
         reminders = []
