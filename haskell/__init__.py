@@ -56,9 +56,7 @@ class HaskellEval(bot.CommandPlugin):
         expr = u' '.join(args)
         result = self.eval(expr)
         if result is not None:
-            return {'action': self.Action.PRIVMSG,
-                    'target': target,
-                    'message': result}
+            return self.privmsg(target, result)
     
 
 class HaskellType(bot.CommandPlugin):
@@ -81,7 +79,5 @@ class HaskellType(bot.CommandPlugin):
         expr = u' '.join(args)
         result = self.query_ghci(expr)
         if result is not None:
-            return {'action': self.Action.PRIVMSG,
-                'target': target,
-                'message': result}
+            return self.privmsg(target, result)
     

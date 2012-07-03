@@ -25,10 +25,6 @@ class ChoicePlugin(bot.CommandPlugin):
         if len(args) > 0:
             expr = u' '.join(args) # undo arg split
             choice_args = expr.split(u' or ')
-            
-            return {'action': self.Action.PRIVMSG,
-                    'target': target,
-                    'message': (choice(choice_args).strip(),)
-                    }
+            return self.privmsg(target, choice(choice_args).strip())
     
 

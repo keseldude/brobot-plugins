@@ -55,10 +55,7 @@ class SeenPlugin(bot.CommandPlugin):
         if len(args) == 1:
             nick = args[0].lower().encode('utf-8')
             if nick == source.nick:
-                return {'action': self.Action.PRIVMSG,
-                        'target': target,
-                        'message': (u'I see you!',)
-                        }
+                return self.privmsg(target, 'I see you!')
             
             key = '%s_%s_%s' % (prefix, connection.server.host, nick)
             
@@ -74,11 +71,7 @@ class SeenPlugin(bot.CommandPlugin):
                                  self.format_timedelta(delta))
             finally:
                 shelf.close()
-            
-            return {'action': self.Action.PRIVMSG,
-                    'target': target,
-                    'message': (message,)
-                    }
+            return self.privmsg(target, message)
     
 
 class UserTrackPlugin(bot.EventPlugin):

@@ -51,19 +51,13 @@ class DefinePlugin(bot.CommandPlugin):
         f_name = args[0]
         expr = u' '.join(args[1:])
         if 'lambda' not in expr:
-            return {'action': self.Action.PRIVMSG,
-                    'target': target,
-                    'message': (u'Needs lambda',)
-                    }
+            return self.privmsg(target, 'Needs lambda')
         plugin = self.create_plugin(f_name, expr, target)
         if isinstance(plugin, dict):
             return plugin
         
         if not self.ircbot.register_command_plugin(plugin.name, plugin):
-            return {'action': self.Action.PRIVMSG,
-                    'target': target,
-                    'message': (u'Command already defined. Sorry.',)
-                    }
+            return self.privmsg(target, 'Command already defined. Sorry.')
         shelf = shelve.open(self.shelf_path)
         try:
             if shelf.has_key(SHELF_KEY):
@@ -77,11 +71,7 @@ class DefinePlugin(bot.CommandPlugin):
             shelf.close()
         
         DEFINED.append((f_name, expr))
-        
-        return {'action': self.Action.PRIVMSG,
-                'target': target,
-                'message': (u'Defined %s.' % f_name,)
-                }
+        return self.privmsg(target, u'Defined %s.' % f_name)
     
     def create_plugin(self, f_name, expr, target=None):
         try:
@@ -89,34 +79,21 @@ class DefinePlugin(bot.CommandPlugin):
         except SyntaxError:
             if target is None:
                 return False
-            return {'action': self.Action.PRIVMSG,
-                    'target': target,
-                    'message': (u'Syntax Error',)
-                    }
+            return self.privmsg(target, 'Syntax Error')
         if target is not None:
             if len(inspect.getargspec(lmbda)[0]) != 1:
-                return {'action': self.Action.PRIVMSG,
-                        'target': target,
-                        'message': (u'Lambda must have one argument',)
-                        }
-        
+                return self.privmsg(target, 'Lambda must have one argument')
         class DefinedPlugin(bot.CommandPlugin):
             name = f_name
             def process(self, c, s, t, a):
                 try:
                     result = lmbda(u' '.join(a))
-                except Exception, e:
+                except Exception as e:
                     ename = e.__class__.__name__
                     msg = '%s: %s' % (ename, e)
-                    return {'action': self.Action.PRIVMSG,
-                            'target': t,
-                            'message': (msg,)
-                            }
+                    return self.privmsg(t, msg)
                 else:
-                    return {'action': self.Action.PRIVMSG,
-                            'target': t,
-                            'message': (result,)
-                            }
+                    return self.privmsg(t, result)
         return DefinedPlugin
 
 class UndefinePlugin(bot.CommandPlugin):
@@ -130,10 +107,7 @@ class UndefinePlugin(bot.CommandPlugin):
                 break
         if f_expr is not None:
             if not self.ircbot.unregister_command_plugin(f_name):
-                return {'action': self.Action.PRIVMSG,
-                        'target': target,
-                        'message': (u'Could not remove plugin %s.' % f_name,)
-                        }
+                return self.privmsg(target, u'Could not remove plugin %s.' % f_name)
             f_pair = (f_name, f_expr)
             DEFINED.remove(f_pair)
             shelf = shelve.open(self.shelf_path)
@@ -146,14 +120,8 @@ class UndefinePlugin(bot.CommandPlugin):
                 log.error('Unable to remove the plugin... something is wrong.')
             finally:
                 shelf.close()
-            return {'action': self.Action.PRIVMSG,
-                    'target': target,
-                    'message': (u'Undefined %s.' % f_name,)
-                    }
+            return self.privmsg(target, u'Undefined %s.' % f_name)
         else:
-            return {'action': self.Action.PRIVMSG,
-                    'target': target,
-                    'message': (u'No such plugin has been defined.',)
-                    }
+            return self.privmsg(target, u'No such plugin has been defined.')
     
 

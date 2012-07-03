@@ -22,8 +22,5 @@ class ReversePlugin(bot.CommandPlugin):
     name = 'reverse'
     def process(self, connection, source, target, args):
         expr = u' '.join(args)
-        return {'action': self.Action.PRIVMSG,
-                'target': target,
-                'message': expr[::-1].split(u'\n')
-                }
+        return self.privmsg(target, expr[::-1].split(u'\n'))
     

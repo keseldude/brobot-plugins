@@ -37,7 +37,7 @@ class URITitlePlugin(bot.EventPlugin):
     def get_title(self, uri):
         try:
             connected_uri = urllib.urlopen(uri)
-        except IOError, e:
+        except IOError as e:
             log.error(unicode(e))
             return None
         

@@ -59,10 +59,7 @@ class ReminderPlugin(bot.CommandPlugin):
     
     def process(self, connection, source, target, args):
         if len(args) < 2:
-            return {'action': self.Action.PRIVMSG,
-                    'target': target,
-                    'message': (self.syntax,)
-                    }
+            return self.privmsg(target, self.syntax)
         
         nick = args[0]
         
@@ -74,24 +71,15 @@ class ReminderPlugin(bot.CommandPlugin):
             else:
                 channel = self.ircbot.find_channel(connection.server, target)
                 if channel is None:
-                    return {'action': self.Action.PRIVMSG,
-                            'target': target,
-                            'message': (self.syntax,)
-                            }
+                    return self.privmsg(target, self.syntax)
                 elif not channel.in_channel(nick):
-                    return {'action': self.Action.PRIVMSG,
-                            'target': target,
-                            'message': (u'User not in channel.',)
-                            }
+                    return self.privmsg(target, 'User not in channel.')
             args = args[1:]
         
         amount_of_time = self.TIME_SPLIT_RE.split(args[0])
         delta = self.get_timedelta(amount_of_time)
         if delta is None:
-            return {'action': self.Action.PRIVMSG,
-                    'target': target,
-                    'message': (self.syntax,)
-                    }
+            return self.privmsg(target, self.syntax)
         
         future_time = datetime.utcnow() + delta
         
@@ -105,11 +93,9 @@ class ReminderPlugin(bot.CommandPlugin):
         timer.start()
         
         message_object = u'you' if nick == source.nick else nick
-        return {'action': self.Action.PRIVMSG,
-                'target': target,
-                'message': (u'Okay, I will remind %s to %s on %s UTC.' % \
-                            (message_object, task, future_time.ctime()),)
-                }
+        return self.privmsg(target,
+                (u'Okay, I will remind %s to %s on %s UTC.' % \
+                            (message_object, task, future_time.ctime()),))
     
     def get_timedelta(self, amount_of_time):
         deltadict = {}

@@ -37,16 +37,13 @@ class NPPlugin(LastFMPlugin):
             username = args[0]
             try:
                 user = self.lastfm_api.get_user(username)
-            except lastfm.LastfmError, e:
-                print e
+            except lastfm.LastfmError as e:
+                log.error(e)
                 return
             np = user.now_playing
             if not np:
                 np = user.recent_tracks[0]
-            return {'action': self.Action.PRIVMSG,
-                    'target': target,
-                    'message': (np,)
-                    }
+            return self.privmsg(target, np)
 
 class ArtistTagsPlugin(LastFMPlugin):
     name = 'artist-tags'
@@ -56,10 +53,7 @@ class ArtistTagsPlugin(LastFMPlugin):
             artist = self.lastfm_api.get_artist(search)
             top_tags = map(lambda a: a.name, artist.top_tags[:8])
             format = u'Top Tags: %s' % u', '.join(top_tags)
-            return {'action': self.Action.PRIVMSG,
-                    'target': target,
-                    'message': (format,)
-                    }
+            return self.privmsg(target, format)
 
 class SimilarArtistPlugin(LastFMPlugin):
     name = 'similar-artists'
@@ -69,7 +63,5 @@ class SimilarArtistPlugin(LastFMPlugin):
             artist = self.lastfm_api.get_artist(search)
             similar_artists = map(lambda a: a.name, artist.similar[:5])
             format = u'Similar Artsts: %s' % u', '.join(similar_artists)
-            return {'action': self.Action.PRIVMSG,
-                    'target': target,
-                    'message': (format,)
-                    }
+            return self.privmsg(target, format)
+
