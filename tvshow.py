@@ -20,6 +20,7 @@ from core import bot
 import urllib
 from contextlib import closing
 import itertools
+import logging
 
 TVRAGE_INFO_URL = 'http://services.tvrage.com/tools/quickinfo.php?show='
 
@@ -34,11 +35,12 @@ def get_tvrage_info(parameter):
     info = {}
     
     if not contents.startswith('<pre>'):
-        info['error'] = u'Fix your damn plugin!'
+        info['error'] = u'Service currently unavailable. Try again later.'
         return info
     
     for line in itertools.islice(contents.splitlines(), 1, None):
         name, value = line.split('@')
+        value = value.decode('utf-8')
         if name == 'Show Name':
             info['name'] = value
         elif name == 'Show URL':
@@ -85,7 +87,6 @@ class NextShowPlugin(bot.CommandPlugin):
         parameter = u' '.join(args)
         if parameter:
             info = get_tvrage_info(parameter)
-            
             if 'error' in info:
                 return {'action': self.Action.PRIVMSG,
                         'target': target,
