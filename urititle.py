@@ -32,7 +32,7 @@ urllib._urlopener = FirefoxURLopener()
 
 class URITitlePlugin(bot.EventPlugin):
     name = 'uri-title'
-    URI_RE = re.compile(r'https?://[A-Za-z0-9:\-\.\'_/&%#!=?,+]+')
+    URI_RE = re.compile(r'https?://[A-Za-z0-9:\-\.\'_/&%#!=?,+*;~\$\[\]]+')
     def get_title(self, uri):
         try:
             t = lxml.html.parse(uri)
@@ -40,9 +40,7 @@ class URITitlePlugin(bot.EventPlugin):
             log.error(unicode(e))
             return None
         title = t.find('.//title')
-        if getattr(title, 'text'):
-            return title.text
-        return None
+        return getattr(title, 'text', None)
     
     def process(self, connection, source='', target='', message=''):
         for uri in self.URI_RE.findall(message):
